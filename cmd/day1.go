@@ -4,6 +4,9 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/foxlisk/aoc2025/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -30,6 +33,93 @@ func init() {
 	// day1Cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+// this is hilarious
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
 func run(cmd *cobra.Command, args []string) {
-	utils.Foo()
+	part1()
+	part2()
+}
+
+func part1() {
+	fmt.Println("Starting part 1")
+	lines, err := utils.ReadLines("inputs/1_1")
+	check(err)
+	password := 0
+	value := 50
+	for _, line := range lines {
+		if line == "" {
+			fmt.Println("empty line? continuing...")
+			continue
+		}
+		rotation := parseLine(line)
+		prev := value
+		value = (value + rotation) % 100
+		if value < 0 {
+			value += 100
+		}
+		if value == 0 {
+			password++
+		}
+		fmt.Printf("%d rotated %s (%d) -> %d\n", prev, line, rotation, value)
+	}
+	fmt.Println("The password is ", password)
+}
+
+func part2() {
+	fmt.Println("Starting part 2")
+	lines, err := utils.ReadLines("inputs/1_2")
+	check(err)
+	password := 0
+	value := 50
+	for _, line := range lines {
+		if line == "" {
+			fmt.Println("empty line? continuing...")
+			continue
+		}
+		rotation := parseLine(line)
+		full_rotations := utils.Abs(rotation) / 100
+		password += full_rotations
+
+		prev := value
+		value = (prev + rotation) % 100
+		// normalize to range
+		if value < 0 {
+			value += 100
+		}
+		passed_0 := false
+		// if we passed 0 going left, our new value will be higher than our old value; etc
+		if prev != 0 && value != 0 && ((rotation < 0 && value > prev) || (rotation > 0 && value < prev)) {
+			password += 1
+			passed_0 = true
+		}
+		if value == 0 {
+			password += 1
+		}
+		fmt.Printf("Starting %d: rotated %d to %d: full_rotations %d: passed zero? %t\n    password: %d\n", prev, rotation, value, full_rotations, passed_0, password)
+	}
+	fmt.Println("The password is", password)
+}
+
+// returns rotation amount as a signed integer
+func parseLine(line string) int {
+
+	dir := line[0:1]
+	rest := line[1:]
+	val, err := strconv.Atoi(rest)
+	check(err)
+
+	switch dir {
+	case "L":
+		val *= -1
+	case "R":
+		//pass
+	default:
+		panic("Invalid rotation direction.")
+	}
+	return val
 }
