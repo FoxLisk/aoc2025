@@ -33,12 +33,7 @@ func init() {
 	// day1Cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-// this is hilarious
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
+
 
 func run(cmd *cobra.Command, args []string) {
 	part1()
@@ -48,7 +43,7 @@ func run(cmd *cobra.Command, args []string) {
 func part1() {
 	fmt.Println("Starting part 1")
 	lines, err := utils.ReadLines("inputs/1_1")
-	check(err)
+	utils.Check(err)
 	password := 0
 	value := 50
 	for _, line := range lines {
@@ -73,7 +68,7 @@ func part1() {
 func part2() {
 	fmt.Println("Starting part 2")
 	lines, err := utils.ReadLines("inputs/1_2")
-	check(err)
+	utils.Check(err)
 	password := 0
 	value := 50
 	for _, line := range lines {
@@ -111,7 +106,7 @@ func parseLine(line string) int {
 	dir := line[0:1]
 	rest := line[1:]
 	val, err := strconv.Atoi(rest)
-	check(err)
+	utils.Check(err)
 
 	switch dir {
 	case "L":

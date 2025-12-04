@@ -27,3 +27,10 @@ func Abs(x int) int {
 	}
 	return x
 }
+
+// this is hilarious
+func Check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
