@@ -57,7 +57,7 @@ func part1_day4() {
 	cols := len(grid[0])
 	for i := range rows {
 		for j := range cols {
-			if grid[i][j] != "@"[0] {
+			if grid[i][j] != '@' {
 				continue
 			}
 			// fmt.Printf("Looking at (%d, %d)\n", i, j)
@@ -119,7 +119,7 @@ func removable_indices(grid [][]byte) []indices {
 	cols := len(grid[0])
 	for i := range rows {
 		for j := range cols {
-			if grid[i][j] != "@"[0] {
+			if grid[i][j] != '@' {
 				continue
 			}
 			// fmt.Printf("Looking at (%d, %d)\n", i, j)
