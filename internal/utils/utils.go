@@ -3,6 +3,8 @@ package utils
 import (
 	"bufio"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func ReadLines(filename string) ([]string, error) {
@@ -33,4 +35,22 @@ func Check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+type IdRange struct {
+	Start uint64
+	End   uint64
+}
+
+func IdRangeFromString(s string) (*IdRange, error) {
+	parts := strings.Split(s, "-")
+	var start, end uint64
+	var err error
+	if start, err = strconv.ParseUint(parts[0], 10, 64); err != nil {
+		return nil, err
+	}
+	if end, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
+		return nil, err
+	}
+	return &IdRange{Start: start, End: end}, nil
 }

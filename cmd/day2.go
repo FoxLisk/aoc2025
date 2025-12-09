@@ -36,41 +36,30 @@ func init() {
 	// day2Cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-type idRange struct {
-	start uint64
-	end   uint64
-}
-
 func run_2(cmd *cobra.Command, args []string) {
 	part1_day2()
 	part2_day2()
 }
 
-func read_ranges(filename string) []idRange {
-	var ranges []idRange
+func read_ranges(filename string) []*utils.IdRange {
+	var ranges []*utils.IdRange
 	data, err := os.ReadFile(filename)
 	utils.Check(err)
 	data_s := string(data)
 	data_s = strings.Trim(data_s, "\n")
 	splitted := strings.Split(data_s, ",")
 	for _, s := range splitted {
-		parts := strings.Split(s, "-")
-		var start, end uint64
-		if start, err = strconv.ParseUint(parts[0], 10, 64); err != nil {
-			panic(err)
-		}
-		if end, err = strconv.ParseUint(parts[1], 10, 64); err != nil {
-			panic(err)
-		}
-		ranges = append(ranges, idRange{start: uint64(start), end: uint64(end)})
+		myRange, err := utils.IdRangeFromString(s)
+		utils.Check(err)
+		ranges = append(ranges, myRange)
 	}
 	return ranges
 }
 
-func total_things_to_check(ranges []idRange) int {
+func total_things_to_check(ranges []utils.IdRange) int {
 	total := 0
 	for _, thing := range ranges {
-		total += int(thing.end) - int(thing.start) + 1
+		total += int(thing.End) - int(thing.Start) + 1
 	}
 	return total
 }
@@ -115,10 +104,10 @@ func id_is_invalid_2(num uint64) bool {
 	return false
 }
 
-func invalid_ids_in_range(a_range idRange, checker func(uint64) bool) []uint64 {
+func invalid_ids_in_range(a_range *utils.IdRange, checker func(uint64) bool) []uint64 {
 	var invalidIds []uint64
-	candidate := a_range.start
-	for candidate <= a_range.end {
+	candidate := a_range.Start
+	for candidate <= a_range.End {
 		if checker(candidate) {
 			invalidIds = append(invalidIds, candidate)
 		}
