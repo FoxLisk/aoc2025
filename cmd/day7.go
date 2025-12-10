@@ -28,24 +28,15 @@ func init() {
 }
 
 func part1_day7() {
-	lines, err := utils.ReadLines("inputs/7_ex")
-	utils.Check(err)
-	entryIndex, err := getEntryIndex(lines[0])
-	utils.Check(err)
-
-	state := beamState{beams: map[int]bool{*entryIndex: true}, width: len(lines[0])}
-	runState(&state, lines[1:], false)
+	runPart(func(entryIndex, width int) *beamState {
+		return &beamState{beams: map[int]bool{entryIndex: true}, width: width}
+	})
 }
 
 func part2_day7() {
-	// copypaste, fucking blow me
-	lines, err := utils.ReadLines("inputs/7")
-	utils.Check(err)
-	entryIndex, err := getEntryIndex(lines[0])
-	utils.Check(err)
-	state := beamState2{particleFuturesAtIndex: map[int]int{*entryIndex: 1}, width: len(lines[0]), totalFutures: 1}
-	runState(&state, lines[1:], false)
-
+	runPart(func(entryIndex, width int) *beamState2 {
+		return &beamState2{particleFuturesAtIndex: map[int]int{entryIndex: 1}, width: width, totalFutures: 1}
+	})
 }
 
 func getEntryIndex(line string) (*int, error) {
@@ -55,6 +46,15 @@ func getEntryIndex(line string) (*int, error) {
 		}
 	}
 	return nil, errors.New("no entry index found")
+}
+
+func runPart[T beamInterface](f func(int, int) T) {
+	lines, err := utils.ReadLines("inputs/7")
+	utils.Check(err)
+	entryIndex, err := getEntryIndex(lines[0])
+	utils.Check(err)
+	state := f(*entryIndex, len(lines[0]))
+	runState(state, lines[1:], false)
 }
 
 func runState(state beamInterface, lines []string, display bool) {

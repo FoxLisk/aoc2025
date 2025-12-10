@@ -13,3 +13,20 @@ func main() {
 		cmd.Execute()
 	}
 }
+
+type I interface {
+	f()
+	make() I
+}
+
+type T1 struct {
+	//
+}
+
+func (t1 T1) f() {
+
+}
+
+func handle(i I) {
+
+}
