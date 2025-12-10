@@ -4,6 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 
@@ -17,7 +18,7 @@ var day7Cmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  `x`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// part1_day7()
+		part1_day7()
 		part2_day7()
 	},
 }
@@ -29,44 +30,48 @@ func init() {
 func part1_day7() {
 	lines, err := utils.ReadLines("inputs/7_ex")
 	utils.Check(err)
-	var entryIndex = -1
-	for i, c := range lines[0] {
-		if c == 'S' {
-			entryIndex = i
-		}
-	}
-	if entryIndex == -1 {
-		panic("no entrypoint found")
-	}
-	state := beamState{beams: map[int]bool{entryIndex: true}, width: len(lines[0])}
-	for _, line := range lines {
-		row := parseManifoldRow(line)
-		state.moveThroughRow(row)
-		state.displayAfterRow(row)
-	}
-	fmt.Println("Total splits:", state.totalSplits)
+	entryIndex, err := getEntryIndex(lines[0])
+	utils.Check(err)
+
+	state := beamState{beams: map[int]bool{*entryIndex: true}, width: len(lines[0])}
+	runState(&state, lines[1:], false)
 }
 
 func part2_day7() {
 	// copypaste, fucking blow me
 	lines, err := utils.ReadLines("inputs/7")
 	utils.Check(err)
-	var entryIndex = -1
-	for i, c := range lines[0] {
+	entryIndex, err := getEntryIndex(lines[0])
+	utils.Check(err)
+	state := beamState2{particleFuturesAtIndex: map[int]int{*entryIndex: 1}, width: len(lines[0]), totalFutures: 1}
+	runState(&state, lines[1:], false)
+
+}
+
+func getEntryIndex(line string) (*int, error) {
+	for i, c := range line {
 		if c == 'S' {
-			entryIndex = i
+			return &i, nil
 		}
 	}
-	if entryIndex == -1 {
-		panic("no entrypoint found")
-	}
-	state := beamState2{particleFuturesAtIndex: map[int]int{entryIndex: 1}, width: len(lines[0]), totalFutures: 1}
+	return nil, errors.New("no entry index found")
+}
+
+func runState(state beamInterface, lines []string, display bool) {
 	for _, line := range lines {
 		row := parseManifoldRow(line)
 		state.moveThroughRow(row)
-		state.displayAfterRow(row)
+		if display {
+			state.displayAfterRow(row)
+		}
 	}
-	fmt.Println("Total futures:", state.totalFutures)
+	fmt.Println("Solution:", state.solution())
+}
+
+type beamInterface interface {
+	moveThroughRow(manifoldRow)
+	displayAfterRow(manifoldRow)
+	solution() int
 }
 
 type beamState struct {
@@ -109,6 +114,10 @@ func (bs beamState) displayAfterRow(mr manifoldRow) {
 	fmt.Println(s)
 }
 
+func (bs beamState) solution() int {
+	return bs.totalSplits
+}
+
 func (bs *beamState2) moveThroughRow(row manifoldRow) {
 	// at each splitter, each current timeline is split (i.e. incremented)
 	// for each particle timeline that made it to this splitter. so if 1 particle
@@ -139,6 +148,10 @@ func (bs beamState2) displayAfterRow(mr manifoldRow) {
 		}
 	}
 	fmt.Println(s)
+}
+
+func (bs beamState2) solution() int {
+	return bs.totalFutures
 }
 
 type manifoldRow struct {
