@@ -27,7 +27,8 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		part1_day8()
+		// part1_day8()
+		part2_day8()
 	},
 }
 
@@ -51,15 +52,10 @@ type junctionGrid struct {
 
 func part1_day8() {
 	fmt.Println("hi day 8")
-	grid := parse_input_day8("inputs/8")
-	// for i, whatever := range grid.vertices {
-	// 	fmt.Printf("  vertex: %s - indexed: %s\n", whatever, grid.vertices[i])
-	// }
-	// for i, whatever := range grid.vertices {
-	// 	fmt.Printf("  vertex: %s - indexed: %s\n", whatever, grid.vertices[i])
-	// }
+	grid := parse_input_day8("inputs/8_ex")
+
 	grid.orderByEuclideanDistance()
-	grid.addConnections(1000)
+	grid.addConnections(10)
 	slices.SortFunc(grid.circuits, func(a, b map[*vertex]bool) int {
 		return -cmp.Compare(len(a), len(b))
 	})
@@ -68,7 +64,21 @@ func part1_day8() {
 		pw *= len(c)
 	}
 	fmt.Println("The password is", pw)
+}
 
+func part2_day8() {
+	fmt.Println("hi day 8")
+	grid := parse_input_day8("inputs/8")
+
+	grid.orderByEuclideanDistance()
+	for _, pd := range grid.distances {
+		grid.addConnection(&pd.p)
+		if len(grid.circuits) == 1 && len(grid.circuits[0]) == len(grid.vertices) {
+			fmt.Println("final connection added: ", pd.p.v1, pd.p.v2)
+			fmt.Println("Password: ", pd.p.v1.x*pd.p.v2.x)
+			break
+		}
+	}
 }
 
 // gross! and probably unnecessary!
@@ -144,7 +154,12 @@ func (g *junctionGrid) calculateDistances() {
 	}
 }
 
+// returns the *final* connection added, because that's required for part2, even though it's
+// pretty bad software design IMO
 func (g *junctionGrid) addConnections(amount int) {
+	if amount == 0 {
+		panic("Come on dude")
+	}
 	for _, info := range g.distances[:amount] {
 		if debug {
 			fmt.Printf("Adding connection: %s - %s\n", info.p.v1, info.p.v2)
@@ -161,12 +176,13 @@ func (g *junctionGrid) addConnection(p *pair) {
 	// how do i do type aliases someone please help me my family is dying
 	var found1 *map[*vertex]bool
 	var found2 *map[*vertex]bool
+	var found2_idx *int
 	for i, circuit := range g.circuits {
 		// N.B. we're not catching the case where both ends of a pair are already in the same circuit
 		hasV1 := circuit[v1]
-		if debug {
-			fmt.Printf("    is %s in %v? %v\n", v1, circuit, hasV1)
-		}
+		// if debug {
+		// 	fmt.Printf("    is %s in %v? %v\n", v1, circuit, hasV1)
+		// }
 		hasV2 := circuit[v2]
 		if hasV1 {
 			if debug {
@@ -190,6 +206,7 @@ func (g *junctionGrid) addConnection(p *pair) {
 			}
 			found2 = &circuit
 			circuit[v1] = true
+			found2_idx = &i
 		}
 		// it *should* be safe to break early here, but i guess we can keep looping to catch bad data
 	}
@@ -198,8 +215,7 @@ func (g *junctionGrid) addConnection(p *pair) {
 			fmt.Println("Found homes for both circuits; merging")
 		}
 		// merge the circuits; it doesnt matter which one we pick
-		// i'm just gonna drain the other circuit & leave it in the list of circuits, which is annoying but should be correct
-		// ok why do i have to dereference the pointer to iterate the map?
+
 		for k, v := range *found2 {
 			if !v {
 				panic(fmt.Sprintf("Found false value for key %s in circuit", k))
@@ -208,6 +224,7 @@ func (g *junctionGrid) addConnection(p *pair) {
 		}
 		// why the FUCK is clear a magical global namespace function?
 		clear(*found2)
+		g.circuits = append(g.circuits[:*found2_idx], g.circuits[*found2_idx+1:]...)
 	}
 	if found1 == nil && found2 == nil {
 		if debug {
@@ -252,7 +269,7 @@ type vertex struct {
 }
 
 func (v *vertex) String() string {
-	return fmt.Sprintf("(%d, %d, %d) (%p)", v.x, v.y, v.z, v)
+	return fmt.Sprintf("(%d, %d, %d)", v.x, v.y, v.z)
 }
 
 // returns square of distance because that sorts the same as distance
