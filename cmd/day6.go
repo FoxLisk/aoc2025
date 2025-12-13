@@ -61,7 +61,7 @@ func part1_day6() {
 			acc = 1
 			reducer = func(a int, b int) int { return a * b }
 		}
-		val := reduce(cols[i], acc, reducer)
+		val := utils.Reduce(cols[i], acc, reducer)
 		thePassword += val
 		// fmt.Println("doing", op, "to ", cols[i], " - got ", val)
 	}
@@ -97,9 +97,9 @@ func (p *problem) calculate() int {
 		nums = append(nums, parsed)
 	}
 	if p.op == '+' {
-		return reduce(nums, 0, func(a, b int) int { return a + b })
+		return utils.Reduce(nums, 0, func(a, b int) int { return a + b })
 	} else if p.op == '*' {
-		return reduce(nums, 1, func(a, b int) int { return a * b })
+		return utils.Reduce(nums, 1, func(a, b int) int { return a * b })
 	} else {
 		panic("uh uh")
 	}
@@ -139,11 +139,4 @@ func part2_day6() {
 		thePassword += val
 	}
 	fmt.Println("password:", thePassword)
-}
-
-func reduce(nums []int, acc int, f func(int, int) int) int {
-	for _, num := range nums {
-		acc = f(acc, num)
-	}
-	return acc
 }

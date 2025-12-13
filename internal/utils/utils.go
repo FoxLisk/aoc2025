@@ -54,3 +54,10 @@ func IdRangeFromString(s string) (*IdRange, error) {
 	}
 	return &IdRange{Start: start, End: end}, nil
 }
+
+func Reduce(nums []int, acc int, f func(int, int) int) int {
+	for _, num := range nums {
+		acc = f(acc, num)
+	}
+	return acc
+}
