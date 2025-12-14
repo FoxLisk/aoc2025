@@ -14,8 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var debug bool = false
-
 // day8Cmd represents the day8 command
 var day8Cmd = &cobra.Command{
 	Use:   "day8",
